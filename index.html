@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WazirX API Request</title>
+    <!-- Add Bootstrap 4 CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Add flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <!--responsive meta tag-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        /* Additional Custom Styles */
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        label {
+            font-weight: bold;
+        }
+        #response-container {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <br>
+    <div class="container">
+        <h1 class="mb-4">Historical Crypto Price Checker </h1>
+        <form>
+            <div class="form-group">
+                <label for="symbol">Select Symbol</label>
+                <select id="symbol" class="form-control">
+                    <option value="usdtinr">USDT-INR</option>
+                    <option value="btcinr">BTC-INR</option>
+                    <option value="ethinr">ETH-INR</option>
+                    <option value="xrpinr">XRP-INR</option>
+                    <option value="ltcinr">LTC-INR</option>
+                    <option value="bnbinr">BNB-INR</option>
+                    <option value="ethbtc">ETH-BTC</option>
+                    <!-- Add more trading pairs here -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="startTime">Select Start Time</label>
+                <input type="text" id="startTime" class="form-control" placeholder="Select a date and time">
+            </div>
+            <button type="button" class="btn btn-primary btn-block" onclick="fetchPriceData()">Fetch Price Data</button>
+        </form>
+        <div id="response-container" class="mt-4"></div>
+
+        <p style="font-size: 12px;" class="text-center">&copy; mohammed suhail chinya salimpasha | open-source tools</p>
+    </div>
+
+    <!-- Add Bootstrap 4 JS and Popper.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Add flatpickr script -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <script>
+        // Initialize flatpickr
+        flatpickr("#startTime", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+        });
+
+        function fetchPriceData() {
+            const symbol = document.getElementById("symbol").value;
+            const startTimeInput = document.getElementById("startTime");
+            const startTime = Math.floor(new Date(startTimeInput.value).getTime() / 1000); // Convert selected datetime to Unix timestamp
+
+            // Construct the API URL
+            const apiUrl = `https://api.wazirx.com/sapi/v1/klines?symbol=${symbol}&interval=1m&startTime=${startTime}`;
+
+            // Make the API request
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        const openPrice = parseFloat(data[0][1]); // Open price
+                        const closePrice = parseFloat(data[0][4]); // Close price
+                        const highPrice = parseFloat(data[0][2]); // High price
+                        const lowPrice = parseFloat(data[0][3]); // Low price
+
+                        document.getElementById("response-container").innerHTML = `
+                            <p class="font-weight-bold">Symbol: ${symbol}</p>
+                            <p class="font-weight-bold">Interval: 1 minute</p>
+                            <p>Open Price: ${openPrice}</p>
+                            <p>Close Price: ${closePrice}</p>
+                            <p>High Price: ${highPrice}</p>
+                            <p>Low Price: ${lowPrice}</p>
+                        `;
+                    } else {
+                        document.getElementById("response-container").innerHTML = `<p class="text-danger">No data available for the selected parameters.</p>`;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("response-container").innerHTML = `<p class="text-danger">Error: ${error}</p>`;
+                });
+        }
+    </script>
+</body>
+</html>
